@@ -1,8 +1,7 @@
 import pytest
 import allure
+
 from constants import TestingPages
-
-
 from pages.order_scooter_page import OrderScooterPage
 from locators.order_scooter_page_locator import (
     OrderBtn,
@@ -10,8 +9,11 @@ from locators.order_scooter_page_locator import (
     OrderFormScooterData,
 )
 
-@allure.title('Оформление заказа смоката через две точки входа')
-@allure.description("Сквозной параметризованный кейс: заказ самоката через верхнюю и нижнюю кнопки")
+
+@allure.title("Оформление заказа самоката через две точки входа")
+@allure.description(
+    "Сквозной параметризованный кейс: заказ самоката через верхнюю и нижнюю кнопки"
+)
 @pytest.mark.parametrize(
     "order_btn, metro_station, date, lease_period, color",
     [
@@ -31,37 +33,29 @@ from locators.order_scooter_page_locator import (
         ),
     ],
 )
-def test_order_scooter_flow(driver, order_btn, metro_station, date,
-                            lease_period, color):
-    order_scooter_page = OrderScooterPage(driver)
+class TestOrderingScooter:
 
-    #Открываем главную страницу
-    order_scooter_page.open_page()
+    def test_order_scooter_flow(
+        self, driver, order_btn, metro_station, date, lease_period, color
+    ):
+        order_scooter_page = OrderScooterPage(driver)
 
-    #Скроллим только если это нижняя кнопка
-    from pages.base_page import BaseMethods
-    if order_btn is OrderBtn.order_lower_btn:
-        BaseMethods.scroll_down(driver)
+        order_scooter_page.open_page()
 
-    #Нажимаем нужную кнопку "Заказать"
-    order_scooter_page.click_order(order_btn)
+        if order_btn is OrderBtn.order_lower_btn:
+            order_scooter_page.scroll_down()
 
-    #Заполняем и отправляем форму с персональными данными
-    order_scooter_page.fill_order_form_personal_data(metro_station)
+        order_scooter_page.click_order(order_btn)
+        order_scooter_page.fill_order_form_personal_data(metro_station)
+        order_scooter_page.fill_order_form_data_scooter(date, lease_period, color)
 
-    #Заполняем и отправляем форму о самокате и времени
-    order_scooter_page.fill_order_form_data_scooter(date, lease_period, color)
+        order_scooter_page.wait_successfully_issued_modal()
+        order_scooter_page.wait_check_status()
+        order_scooter_page.click_check_status()
+        order_scooter_page.click_logo_scooter()
 
-    
-    order_scooter_page.wait_successfully_issued_modal()
-    order_scooter_page.wait_check_status()
-    order_scooter_page.click_check_status()
-        
-    order_scooter_page.click_logo_scooter()
-    
-    assert BaseMethods.get_current_url(driver) == TestingPages.ORDER_SCOOTER_PAGE
-    
-    order_scooter_page.click_logo_yandex()
-    
-    assert BaseMethods.get_current_url(driver) == TestingPages.YANDEX_DZEN_PAGE
-    
+        assert order_scooter_page.get_current_url() == TestingPages.ORDER_SCOOTER_PAGE
+
+        order_scooter_page.click_logo_yandex()
+
+        assert order_scooter_page.get_current_url() == TestingPages.YANDEX_DZEN_PAGE

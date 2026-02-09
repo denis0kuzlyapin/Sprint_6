@@ -1,9 +1,9 @@
-from pages.home_page import HomePage
-from pages.base_page import BaseMethods
-from constants import FAQAnswerText
-from locators.home_page_locators import (FAQ, FAQAnswer)
 import pytest
 import allure
+
+from pages.home_page import HomePage
+from constants import FAQAnswerText
+from locators.home_page_locators import FAQ, FAQAnswer
 
 
 class TestDropdownFAQ:
@@ -51,23 +51,20 @@ class TestDropdownFAQ:
         ),
     ]
 
-    @allure.title('Проверка ответов на FAQ')
-    @allure.description('Параметризованный тест для првоерки ответа после нажатия на дроп-даун в FAQ')
+    @allure.title("Проверка ответов на FAQ")
+    @allure.description(
+        "Параметризованный тест: проверка текста ответа после клика по дропдауну FAQ"
+    )
     @pytest.mark.parametrize("faq_locator, faq_locator_answer, expected_text", FAQ_DATA)
-    def test_check_answer_to_question(self,driver, faq_locator, faq_locator_answer, expected_text):
-
-        # Создаем объект класса HomePage
+    def test_check_answer_to_question(
+        self, driver, faq_locator, faq_locator_answer, expected_text
+    ):
         home_page = HomePage(driver)
 
-        # перешли на страницу тестового приложения
         home_page.open_page()
-        
-        # Скроллим вниз
-        BaseMethods.scroll_down(driver)
-        # Кликаем на дроп-даун
+        home_page.scroll_down()
         home_page.click_faq_locator(faq_locator)
-        # Сохраняем ответ на вопрос в дроп-дауне и сохраняем в переменную
+
         actual_text = home_page.get_faq_locator_answer_txt(faq_locator_answer)
-        # Проверяем полученный текст с ожидаемым
+
         assert actual_text == expected_text
-        
